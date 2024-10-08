@@ -1,7 +1,11 @@
-using dotnet_woodys_wild_guess.Client.Pages;
-using dotnet_woodys_wild_guess.Components;
+using dotnet.woodyswildguess.Client.Pages;
+using dotnet.woodyswildguess.Components;
+using dotnet.woodyswildguess.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Access Control
+builder.AddAccessControl();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -30,6 +34,9 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(dotnet_woodys_wild_guess.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(dotnet.woodyswildguess.Client._Imports).Assembly);
+
+app.MapGroup("/authentication")
+    .MapLoginAndLogout();
 
 app.Run();

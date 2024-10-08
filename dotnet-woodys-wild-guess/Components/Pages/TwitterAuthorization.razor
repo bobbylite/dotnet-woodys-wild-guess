@@ -1,5 +1,10 @@
 ﻿@page "/twitterauthorization"
-@rendermode InteractiveWebAssembly
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
 
 <div class="d-flex align-items-center justify-content-center vh-100 bg-light">
     <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
@@ -15,5 +20,5 @@
 </div>
 
 @code {
-
+    
 }

@@ -15,7 +15,7 @@ The solution contains three projects:
 
 ## :rocket: Getting Started
 
-To get started with the OnlyBalds application, follow these steps:
+To get started with the Woody's Wild Guess application, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/bobbylite/dotnet-woodys-wild-guess.git`
 2. Navigate to the project directory: `cd dotnet-woodys-wild-guess`
@@ -43,7 +43,7 @@ dotnet run --project woodyswildguess.Api --launch-profile https
 
 First, you need to run the Backend for Frontend (BFF) which is the Web API project. This project handles the backend operations and serves as the bridge between the Blazor application and the database.
 
-To run the OnlyBalds application locally, follow these steps:
+To run the Woody's Wild Guess application locally, follow these steps:
 1. Create a launch profile in the properties directory.
 3. Use VS Code's debug section to run the profile created in the previous steps.
 
@@ -56,7 +56,7 @@ To run the OnlyBalds application locally, follow these steps:
 
 ## :handshake: Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check [issues page](https://github.com/bobbylite/OnlyBalds/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check [issues page](https://github.com/bobbylite/dotnet-woodys-wild-guess/issues).
 
 ## :memo: License
 

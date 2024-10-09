@@ -8,7 +8,7 @@ Woody's Wild Estimations is a Blazor application . It's designed to provide a se
 
 ## :file_folder: Projects
 
-The solution contains three projects:
+The solution contains two projects:
 
 1. **Blazor Server**: This project handles the server-side rendering of the Blazor application.
 2. **Blazor Client**: This project is responsible for the client-side logic and UI of the Blazor application.
@@ -20,7 +20,8 @@ To get started with the Woody's Wild Guess application, follow these steps:
 1. Clone the repository: `git clone https://github.com/bobbylite/dotnet-woodys-wild-guess.git`
 2. Navigate to the project directory: `cd dotnet-woodys-wild-guess`
 3. Restore the packages: `dotnet restore`
-4. Run the application: `dotnet run`
+4. Create an Auth0 Idp tenant (or whatever Idp of your choosing)
+5. Create and register a Twitter Application within the Twitter Developer portal
 
 ## :computer: Running the Project Locally
 

@@ -21,7 +21,9 @@ To get started with the Woody's Wild Guess application, follow these steps:
 2. Navigate to the project directory: `cd dotnet-woodys-wild-guess`
 3. Restore the packages: `dotnet restore`
 4. Create an Auth0 Idp tenant (or whatever Idp of your choosing)
-5. Create and register a Twitter Application within the Twitter Developer portal
+5. Register a Web App within the Auth0 tenant or equivalent authentication process. 
+5. Create a Twitter Application within the Twitter Developer portal
+6. Register the Twitter Application to allow posts via OpenId Connect Authorization Code w/ PKCE grant type
 
 ## :computer: Running the Project Locally
 

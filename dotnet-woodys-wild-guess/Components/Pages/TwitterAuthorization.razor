@@ -1,22 +1,114 @@
 ﻿@page "/twitterauthorization"
 @rendermode InteractiveServer
 
+@using Flurl
+@using Flurl.Http
+@using Microsoft.AspNetCore.Authentication.OpenIdConnect
 @using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Extensions.Options
+@using System.Text.Json
+
+@inject IOptionsSnapshot<TwitterOptions> TwitterOptions
+@inject IOptionsSnapshot<OpenIdConnectOptions> OpenIdConnectOptions  
+@inject IJSRuntime JsRuntime
+@inject ILogger<TwitterAuthorization> _logger
+@inject NavigationManager NavigationManager
 
 @attribute [Authorize]
-
 
 <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
     <div class="card-body text-center">
         <i class="bi bi-twitter text-primary display-4 mb-3"></i>
         <h5 class="card-title">Authorize Twitter Application</h5>
         <p class="card-text mb-4">By authorizing this application, you will allow it to access your Twitter account and perform actions on your behalf. Make sure you trust the app before proceeding.</p>
-        <button id="authorizeBtn" class="btn btn-primary w-100 btn-lg">
-            <i class="bi bi-box-arrow-in-right"></i> Authorize
-        </button>
+        <form id="oauthForm" action="@_authorizeUrl" method="post">
+            <button type="submit" id="authorizeBtn" class="btn btn-primary w-100 btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Authorize
+            </button>
+        </form>
     </div>
 </div>
 
 @code {
-    
+    private readonly string _authorizeUrl;
+    private ClaimsPrincipal? _user;
+    private IJSObjectReference? _jsModule;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+    private DotNetObjectReference<TwitterAuthorization>? objRef;
+
+    public TwitterAuthorization()
+    {
+        _authorizeUrl = ConstructAuthorizeUrl(TwitterOptions.Value);
+    }
+
+    /// <summary>
+    /// Initializes the component asynchronously. It checks if the authentication state is not null,
+    /// retrieves the current user from the authentication state, and creates a DotNetObjectReference
+    /// to this component for JavaScript interop.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState == null)
+        {
+            return;
+        }
+
+        var authState = await AuthState;
+        _user = authState.User;
+        objRef = DotNetObjectReference.Create(this);
+    }
+
+    /// <summary>
+    /// Executes after the component has rendered. On the first render, it imports a JavaScript module
+    /// associated with this component, retrieves user claims, and initializes JavaScript functionality
+    /// by invoking methods in the imported module with necessary parameters.
+    /// </summary>
+    /// <param name="firstRender">Indicates whether this is the first time the component is being rendered.</param>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule ??= await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/TwitterAuthorization.razor.js");
+            
+            var oidcOptions = OpenIdConnectOptions.Get(OpenIdConnectDefaults.AuthenticationScheme);
+            ArgumentNullException.ThrowIfNull(oidcOptions);
+            var twitterOptions = TwitterOptions.Value;
+            ArgumentNullException.ThrowIfNull(twitterOptions);
+
+            var options = new {
+                twitterOptions = new {
+                    clientId = twitterOptions.ClientId,
+                    redirectUri = twitterOptions.RedirectUri,
+                    scope = string.Join(" ", twitterOptions.Scope),
+                    state = twitterOptions.State,
+                    codeChallenge = twitterOptions.CodeChallenge,
+                    codeChallengeMethod = twitterOptions.CodeChallengeMethod
+                }
+            };
+            var serializedOptions = JsonSerializer.Serialize(options);
+
+            await _jsModule.InvokeVoidAsync("addTwitterAuthorizationSupport", objRef, serializedOptions);
+        }
+    }
+
+    private static string ConstructAuthorizeUrl(TwitterOptions twitterOptions)
+    {
+        ArgumentNullException.ThrowIfNull(twitterOptions);
+
+        var twitterBaseUrl = new Url(twitterOptions.BaseUrl);
+
+        return twitterBaseUrl
+            .SetQueryParam("response_type", twitterOptions.ResponseType)
+            .SetQueryParam("client_id", twitterOptions.ClientId)
+            .SetQueryParam("redirect_uri", twitterOptions.RedirectUri)
+            .SetQueryParam("scope", string.Join(" ", twitterOptions.Scope))
+            .SetQueryParam("state", twitterOptions.State)
+            .SetQueryParam("code_challenge", twitterOptions.CodeChallenge)
+            .SetQueryParam("code_challenge_method", twitterOptions.CodeChallengeMethod)
+            .ToString();
+    }
 }

@@ -1,3 +1,4 @@
+using dotnet.woodyswildguess.Configuration;
 using dotnet.woodyswildguess.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -38,6 +39,21 @@ public static class ServiceCollectionExtensions
             oidcOptions.SaveTokens = true;
         });
         
+        return services;
+    }
+
+    /// <summary>
+    /// Adds support for Twitter configuration.
+    /// </summary>
+    /// <param name="services">The collection of service descriptors.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns>The collection of service descriptors.</returns>
+    public static IServiceCollection AddTwitterConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.Configure<TwitterOptions>(configuration.GetSection(TwitterOptions.SectionKey));
+
         return services;
     }
 }

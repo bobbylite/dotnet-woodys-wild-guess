@@ -35,4 +35,18 @@ public static class WebApplicationBuilderExtensions
         
         return webApplicationBuilder;
     }
+
+    /// <summary>
+    /// Add support for Twitter configuration.
+    /// </summary>
+    /// <param name="webApplicationBuilder">A builder for web applications and services.</param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public static WebApplicationBuilder AddTwitterConfiguration(this WebApplicationBuilder webApplicationBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(webApplicationBuilder);
+
+        webApplicationBuilder.Services.AddTwitterConfiguration(webApplicationBuilder.Configuration);
+
+        return webApplicationBuilder;
+    }
 }

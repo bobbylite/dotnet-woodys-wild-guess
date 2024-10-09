@@ -4,6 +4,9 @@ using dotnet.woodyswildguess.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Configuration
+builder.AddTwitterConfiguration();
+
 // Add Access Control
 builder.AddAccessControl();
 
@@ -22,7 +25,8 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, 
+    // see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

@@ -88,7 +88,7 @@ example:
   }
 ```
 
-#### Step 3
+### Running Woody's Wild Guess Web Application
 After configurations are completed, you can run the web application locally.
 Run the project with the following command:
 ```sh

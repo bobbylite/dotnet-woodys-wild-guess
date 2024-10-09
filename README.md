@@ -26,26 +26,74 @@ To get started with the Woody's Wild Guess application, follow these steps:
 
 To run the Woody's Wild Guess application locally, follow these steps:
 
-### Step 1: Run the BFF Backend
+### Configure Woody's Wild Guess Web Application
 
-First, you need to run the Backend for Frontend (BFF) which is the Web API project. This project handles the backend operations and serves as the bridge between the Blazor application and the database.
+First, you need to configure the application settings via the ```appsettings.json``` file.
 
-1. Open a terminal or command prompt.
-2. Navigate to the project directory: `cd Woody's Wild Guess`
-3. Run the BFF backend with the following command:
-```sh
-dotnet run --project woodyswildguess.Api --launch-profile https
+
+#### Step 1
+Configure your Identity Provider under the ```Authentication``` section of the application's appsettings.json configuration file. 
+
+1. Open ```appsettings.json``` or ```appsettings.Development.json```
+2. Navigate to ```Authentication``` section of the file. 
+3. Add in your Identity Provider details.
+
+Example: 
+```json
+  "Authentication": {
+    "DefaultScheme": "OpenIdConnect",
+    "Schemes": {
+      "OpenIdConnect": {
+        "SignInScheme": "Cookies",
+        "Authority": "https://woodys-wild-guess.us.auth0.com",
+        "ClientId": "{your-client-id}",
+        "ClientSecret": "{your-client-secret}",
+        "ResponseType": "code",
+        "CallbackPath": "/signin-oidc",
+        "SaveTokens": true,
+        "Scope": [
+          "openid",
+          "profile"
+        ]
+      }
+    }
+  }
 ```
 
+#### Step 2
+Configure your Twitter Application under the ```TwitterOptions``` section of the application's appsettings.json configuration file. 
 
+1. Open ```appsettings.json``` or ```appsettings.Development.json```
+2. Navigate to ```TwitterOptions``` section of the file. 
+3. Add in the details for your registered Twitter Application.  you can find these details on the Twitter Developer page where your Twitter Application was registered and created.
+4. Make sure that whatever redirect URI is added here also matches the one in your Twitter Application. This is needed for the OpenId Connect Authroziation Code grant type.
 
-### Step 2: Run the BFF Backend
+example: 
+```json
+  "TwitterOptions": {
+    "BaseUrl": "https://twitter.com/i/oauth2/authorize",
+    "ResponseType": "code",
+    "ClientId": "{your-client-id}",
+    "ClientSecret": "{your-client-secret}",
+    "RedirectUri": "https://local.woodyswildguess.com:7243/callback",
+    "Scope": [
+      "offline.access",
+      "users.read",
+      "tweet.read",
+      "tweet.write"
+    ],
+    "State": "state",
+    "CodeChallenge": "challenge",
+    "CodeChallengeMethod": "plain"
+  }
+```
 
-First, you need to run the Backend for Frontend (BFF) which is the Web API project. This project handles the backend operations and serves as the bridge between the Blazor application and the database.
-
-To run the Woody's Wild Guess application locally, follow these steps:
-1. Create a launch profile in the properties directory.
-3. Use VS Code's debug section to run the profile created in the previous steps.
+#### Step 3
+After configurations are completed, you can run the web application locally.
+Run the project with the following command:
+```sh
+dotnet run --project woodyswildguess --launch-profile https
+```
 
 ## :gear: Built With
 

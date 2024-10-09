@@ -30,6 +30,7 @@ To get started with the Woody's Wild Guess application, follow these steps:
 5. Register a Web App within the Auth0 tenant or equivalent authentication process. 
 5. Create a Twitter Application within the Twitter Developer portal
 6. Register the Twitter Application to allow posts via OpenId Connect Authorization Code w/ PKCE grant type
+7. Add ```local.woodyswildguess.com``` to your hosts file for local development
 
 ## :computer: Running the Project Locally
 

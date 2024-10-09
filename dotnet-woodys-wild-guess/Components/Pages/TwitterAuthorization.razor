@@ -32,18 +32,13 @@
 </div>
 
 @code {
-    private readonly string _authorizeUrl;
+    private string? _authorizeUrl;
     private ClaimsPrincipal? _user;
     private IJSObjectReference? _jsModule;
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
     private DotNetObjectReference<TwitterAuthorization>? objRef;
-
-    public TwitterAuthorization()
-    {
-        _authorizeUrl = ConstructAuthorizeUrl(TwitterOptions.Value);
-    }
 
     /// <summary>
     /// Initializes the component asynchronously. It checks if the authentication state is not null,
@@ -60,6 +55,7 @@
         var authState = await AuthState;
         _user = authState.User;
         objRef = DotNetObjectReference.Create(this);
+        _authorizeUrl = ConstructAuthorizeUrl(TwitterOptions.Value);
     }
 
     /// <summary>

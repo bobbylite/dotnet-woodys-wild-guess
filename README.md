@@ -4,7 +4,7 @@
 ![Blazor](https://img.shields.io/badge/Blazor-512BD4?style=for-the-badge&logo=blazor&logoColor=white)
 ![API](https://img.shields.io/badge/API-3C873A?style=for-the-badge&logo=api&logoColor=white)
 
-Woody's Wild Estimations is a .NET Blazor application . It's designed with cutting edge WASM (Web Assembly) technology that makes for an extremely responsive user experience. This provides a seamless user experience that leverages the power of OpenAI's latest Large Language Models combined with Twitter/X's Application Developer platform to deliver the world's first construction estimation tooling in your pocket. 
+Woody's Wild Guess is a flexible construction estimation tool built with .NET Blazor. It's designed with cutting edge WASM (Web Assembly) technology that makes for an extremely responsive user experience. This provides a seamless user experience that leverages the power of OpenAI's latest Large Language Models combined with Twitter/X's Application Developer platform to deliver the world's first construction estimation tooling in your pocket. 
 
 ## Identity Driven Estimations :construction_worker_man:
 The driving force behind all the built in cutting edge tech is your identity.  This allows organizations to trust that any given identity has the right tools for the job through Identity and Access Management controls combined with a RBAC architecure (Role Based Access Control). This means that only certain roles can access certain AI agents, administration panels, twitter controls etc.. 

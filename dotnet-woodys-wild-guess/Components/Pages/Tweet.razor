@@ -1,0 +1,91 @@
+﻿@page "/tweet"
+@rendermode InteractiveServer
+
+@using Flurl
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Text.Json
+@using System.Net.Mime
+@using dotnet.woodyswildguess.Models
+@using dotnet.woodyswildguess.Services.Twitter
+
+@inject ILogger<Tweet> _logger
+@inject NavigationManager Navigation
+@inject IJSRuntime JsRuntime
+@inject IHttpClientFactory HttpClientFactory
+@inject ITwitterService TwitterService
+
+@attribute [Authorize]
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Share Your Tweet</h5>
+            <div class="mb-3">
+                <textarea id="tweet-text" class="form-control" placeholder="What's happening?" rows="3"></textarea>
+            </div>
+            <button id="send-tweet-btn" class="btn btn-primary">Tweet</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ClaimsPrincipal? _user;
+    private IJSObjectReference? _jsModule;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+    private DotNetObjectReference<Tweet>? objRef;
+
+    /// <summary>
+    /// Initializes the component asynchronously. It checks if the authentication state is not null,
+    /// retrieves the current user from the authentication state, and creates a DotNetObjectReference
+    /// to this component for JavaScript interop.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState == null)
+        {
+            return;
+        }
+
+        var authState = await AuthState;
+        _user = authState.User;
+        objRef = DotNetObjectReference.Create(this);
+    }
+
+    /// <summary>
+    /// Executes after the component has rendered. On the first render, it imports a JavaScript module
+    /// associated with this component, retrieves user claims, and initializes JavaScript functionality
+    /// by invoking methods in the imported module with necessary parameters.
+    /// </summary>
+    /// <param name="firstRender">Indicates whether this is the first time the component is being rendered.</param>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule ??= await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Tweet.razor.js");
+
+            await _jsModule.InvokeVoidAsync("addTweetSupport", objRef);
+        }
+    }
+
+    /// <summary>
+    /// Sends a tweet to the authenticated user's Twitter account.
+    /// </summary>
+    [JSInvokable]
+    public async Task<string> PostTweet(string tweetMessage)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(tweetMessage);
+        
+        var statusCode = await TwitterService.SendTweetAsync(tweetMessage);
+        if (statusCode == System.Net.HttpStatusCode.Created)
+        {
+            return "success";
+        }
+
+        return "failure";
+    }
+}

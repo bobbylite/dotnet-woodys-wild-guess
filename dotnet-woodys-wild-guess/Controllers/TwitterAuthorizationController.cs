@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace dotnet.woodyswildguess.Controllers;
 
 /// <summary>
-/// TwitterController
+/// TwitterAuthorizationController
 /// </summary>
 [Route("authorize/twitter/callback")]
 public class TwitterAuthorizationController : Controller
@@ -38,13 +38,13 @@ public class TwitterAuthorizationController : Controller
     {
         ArgumentNullException.ThrowIfNull(code);
         ArgumentNullException.ThrowIfNull(state);
-        
+
         var statusCode = await _twitterService.AuthenticateAsync(code);
 
         if (statusCode is HttpStatusCode.OK)
         {
             _logger.LogDebug("Returning access token response content");
-            return Ok($"Access Token: {_twitterService.AccessToken}");
+            return Redirect("/Tweet");
         }
 
         if (statusCode is HttpStatusCode.Unauthorized)

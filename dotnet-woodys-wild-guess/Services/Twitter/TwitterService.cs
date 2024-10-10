@@ -28,7 +28,7 @@ public class TwitterService : ITwitterService
     /// </summary>
     public TwitterService(ILogger<TwitterService> logger,
         IHttpClientFactory httpClientFactory,
-        IOptionsSnapshot<TwitterOptions> twitterOptions)
+        IOptions<TwitterOptions> twitterOptions)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(logger);
@@ -148,8 +148,8 @@ public class TwitterService : ITwitterService
         _logger.LogDebug("Adding Bearer Token Authorization Headers for Twitter HTTP Client");
         httpClient.AddTwitterBearerTokenAuthorizationHeaders(AccessToken);
 
-        var tweetData = new {
-            tweet = tweetMessage
+        var tweetData = new CreateTweetModel{
+            Text = tweetMessage 
         };
 
         _logger.LogDebug("Serializing tweet data");

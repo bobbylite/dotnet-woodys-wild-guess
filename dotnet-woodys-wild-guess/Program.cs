@@ -8,6 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Configuration
 builder.AddTwitterConfiguration();
 
+// Add HttpClient
+builder.Services.AddHttpClient();
+
+// Add Twitter Service
+builder.AddTwitterServices();
+
 // Add Access Control
 builder.AddAccessControl();
 
@@ -18,12 +24,6 @@ builder.Services.AddRazorComponents()
 
 // Add Api Controllers
 builder.Services.AddControllers();
-
-// Add HttpClient
-builder.Services.AddHttpClient();
-
-// Add Twitter Service
-builder.AddTwitterServices();
 
 var app = builder.Build();
 
@@ -45,6 +45,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+app.MapControllers();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
@@ -52,7 +54,5 @@ app.MapRazorComponents<App>()
 
 app.MapGroup("/authentication")
     .MapLoginAndLogout();
-
-app.MapControllers();
 
 app.Run();

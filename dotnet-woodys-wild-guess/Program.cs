@@ -15,6 +15,12 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+// Add Api Controllers
+builder.Services.AddControllers();
+
+// Add HttpClient
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,5 +48,7 @@ app.MapRazorComponents<App>()
 
 app.MapGroup("/authentication")
     .MapLoginAndLogout();
+
+app.MapControllers();
 
 app.Run();

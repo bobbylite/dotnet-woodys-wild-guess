@@ -5,12 +5,18 @@ namespace dotnet.woodyswildguess.Configuration;
 /// <summary>
 /// Represents the configuration options for Twitter integration.
 /// </summary>
-public class TwitterOptions {
-
+public class TwitterOptions 
+{
     /// <summary>
     /// The section key for Twitter options in the configuration.
     /// </summary>
     public static readonly string SectionKey = "TwitterOptions";
+
+    /// <summary>
+    /// Gets or sets the authorization URL for Twitter API.
+    /// </summary>
+    [JsonPropertyName("token_url")]
+    public string TokenUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the base URL for Twitter API.

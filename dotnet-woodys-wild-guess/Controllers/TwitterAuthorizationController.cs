@@ -48,8 +48,6 @@ public class TwitterAuthorizationController : Controller
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string code, [FromQuery] string state)
     {
-        _logger.LogDebug("Recieved GET request for Twitter authorization code");
-
         _logger.LogDebug("Creating Twitter/X HTTP Client");
         var httpClient = _httpClientFactory.CreateClient();
         _logger.LogDebug("Adding Basic Authorization Headers for Twitter HTTP Client");

@@ -49,4 +49,16 @@ public static class WebApplicationBuilderExtensions
 
         return webApplicationBuilder;
     }
+
+    /// <summary>
+    /// Add support for Twitter services.
+    /// </summary>
+    public static WebApplicationBuilder AddTwitterServices(this WebApplicationBuilder webApplicationBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(webApplicationBuilder);
+
+        webApplicationBuilder.Services.AddTwitterServices();
+
+        return webApplicationBuilder;
+    }
 }

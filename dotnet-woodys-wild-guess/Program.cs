@@ -1,6 +1,7 @@
 using dotnet.woodyswildguess.Client.Pages;
 using dotnet.woodyswildguess.Components;
 using dotnet.woodyswildguess.Extensions;
+using dotnet.woodyswildguess.Services.Twitter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,9 @@ builder.Services.AddControllers();
 
 // Add HttpClient
 builder.Services.AddHttpClient();
+
+// Add Twitter Service
+builder.AddTwitterServices();
 
 var app = builder.Build();
 

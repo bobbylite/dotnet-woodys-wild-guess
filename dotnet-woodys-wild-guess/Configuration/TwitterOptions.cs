@@ -16,7 +16,7 @@ public class TwitterOptions
     /// Gets or sets the authorization URL for Twitter API.
     /// </summary>
     [JsonPropertyName("token_url")]
-    public string TokenUrl { get; set; } = string.Empty;
+    public string ApiBaseUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the base URL for Twitter API.

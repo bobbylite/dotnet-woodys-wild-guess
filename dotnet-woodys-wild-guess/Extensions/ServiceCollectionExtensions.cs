@@ -1,5 +1,6 @@
 using dotnet.woodyswildguess.Configuration;
 using dotnet.woodyswildguess.Identity;
+using dotnet.woodyswildguess.Services.Twitter;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -53,6 +54,18 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.Configure<TwitterOptions>(configuration.GetSection(TwitterOptions.SectionKey));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Adds support for Twitter services.
+    /// </summary>
+    public static IServiceCollection AddTwitterServices(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddSingleton<ITwitterService, TwitterService>();
 
         return services;
     }

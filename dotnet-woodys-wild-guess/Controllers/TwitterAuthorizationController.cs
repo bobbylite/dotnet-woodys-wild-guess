@@ -39,6 +39,12 @@ public class TwitterAuthorizationController : Controller
         ArgumentNullException.ThrowIfNull(code);
         ArgumentNullException.ThrowIfNull(state);
 
+        if (state != _twitterService.StateHash())
+        {
+            _logger.LogError("State mismatch");
+            return Unauthorized("State mismatch");
+        }
+
         var statusCode = await _twitterService.AuthenticateAsync(code);
 
         if (statusCode is HttpStatusCode.OK)

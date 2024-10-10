@@ -31,4 +31,9 @@ public interface ITwitterService
     /// <param name="tweet">The tweet to send.</param>
     /// <returns><see cref="HttpStatusCode"/> asynchronously</returns>
     Task<HttpStatusCode> SendTweetAsync(string tweetMessage);
+
+    /// <summary>
+    /// Gets the user's state for OAuth2 Authorization Code w/ PKCE grant type.
+    /// </summary>
+    public string? StateHash();
 }

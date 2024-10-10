@@ -9,6 +9,7 @@ using dotnet.woodyswildguess.Extensions;
 using dotnet.woodyswildguess.Models;
 using Flurl;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace dotnet.woodyswildguess.Services.Twitter;
 
@@ -73,6 +74,9 @@ public class TwitterService : ITwitterService
             }
         }
     }
+
+    /// <inheritdoc/>
+    public string? StateHash() => ComputeSha256Hash(_twitterOptions.State);
 
     /// <inheritdoc/>
     public TwitterAuthorizationResponseModel? AuthorizationResponse { get; set; }
@@ -167,5 +171,21 @@ public class TwitterService : ITwitterService
         var responseContent = await response.Content.ReadAsStringAsync();
 
         return response.StatusCode;
+    }
+
+    private static string ComputeSha256Hash(string rawData)
+    {
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+
+            StringBuilder builder = new StringBuilder();
+            foreach (var b in bytes)
+            {
+                builder.Append(b.ToString("x2"));
+            }
+
+            return builder.ToString();
+        }
     }
 }

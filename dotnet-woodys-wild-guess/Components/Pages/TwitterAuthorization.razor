@@ -9,12 +9,14 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.Extensions.Options
 @using System.Text.Json
+@using dotnet.woodyswildguess.Services.Twitter
 
 @inject IOptionsSnapshot<TwitterOptions> TwitterOptions
 @inject IOptionsSnapshot<OpenIdConnectOptions> OpenIdConnectOptions  
 @inject IJSRuntime JsRuntime
 @inject ILogger<TwitterAuthorization> _logger
 @inject NavigationManager NavigationManager
+@inject ITwitterService TwitterService
 
 @attribute [Authorize]
 
@@ -55,7 +57,7 @@
         var authState = await AuthState;
         _user = authState.User;
         objRef = DotNetObjectReference.Create(this);
-        _authorizeUrl = ConstructAuthorizeUrl(TwitterOptions.Value);
+        _authorizeUrl = ConstructAuthorizeUrl(TwitterOptions.Value, TwitterService?.StateHash()!);
     }
 
     /// <summary>
@@ -91,7 +93,7 @@
         }
     }
 
-    private static string ConstructAuthorizeUrl(TwitterOptions twitterOptions)
+    private static string ConstructAuthorizeUrl(TwitterOptions twitterOptions, string stateHash)
     {
         ArgumentNullException.ThrowIfNull(twitterOptions);
 
@@ -102,7 +104,7 @@
             .SetQueryParam("client_id", twitterOptions.ClientId)
             .SetQueryParam("redirect_uri", twitterOptions.RedirectUri)
             .SetQueryParam("scope", string.Join(" ", twitterOptions.Scope))
-            .SetQueryParam("state", twitterOptions.State)
+            .SetQueryParam("state", stateHash)
             .SetQueryParam("code_challenge", twitterOptions.CodeChallenge)
             .SetQueryParam("code_challenge_method", twitterOptions.CodeChallengeMethod)
             .ToString();

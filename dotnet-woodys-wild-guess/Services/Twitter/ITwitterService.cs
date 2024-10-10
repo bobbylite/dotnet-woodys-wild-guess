@@ -35,5 +35,8 @@ public interface ITwitterService
     /// <summary>
     /// Gets the user's state for OAuth2 Authorization Code w/ PKCE grant type.
     /// </summary>
+    /// remarks>
+    /// This operation is used to prevent CSRF attacks.
+    /// </remarks>
     public string? StateHash();
 }

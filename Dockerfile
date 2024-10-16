@@ -26,4 +26,4 @@ COPY --from=build /app/publish .
 EXPOSE 80
 
 # Set the entry point for the container
-ENTRYPOINT ["dotnet", "/app/publish/dotnet-woodys-wild-guess.dll"]
+ENTRYPOINT ["dotnet", "dotnet-woodys-wild-guess.dll"]

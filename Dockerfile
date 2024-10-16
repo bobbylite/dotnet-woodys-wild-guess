@@ -1,5 +1,5 @@
 # Use the official .NET SDK image for building the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 # Set the working directory inside the container
 WORKDIR /src
@@ -14,7 +14,7 @@ RUN dotnet restore "./dotnet-woodys-wild-guess/dotnet.woodyswildguess.csproj"
 RUN dotnet publish "./dotnet-woodys-wild-guess/dotnet.woodyswildguess.csproj" -c Release -o /app/publish
 
 # Use the official ASP.NET Core runtime image for running the application
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.0 AS runtime
 
 # Set the working directory for the runtime
 WORKDIR /app

@@ -8,13 +8,13 @@ WORKDIR /src
 COPY . .
 
 # Restore dependencies for the main project and referenced projects
-RUN dotnet restore "./dotnet-woodys-wild-guess/dotnet.woodyswildguess.csproj"
+RUN dotnet restore "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj"
 
 # Build and publish the application
-RUN dotnet publish "./dotnet-woodys-wild-guess/dotnet.woodyswildguess.csproj" -c Release -o /app/publish
+RUN dotnet publish "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj" -c Release -o /app/publish
 
 # Use the official ASP.NET Core runtime image for running the application
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.403 AS runtime
 
 # Set the working directory for the runtime
 WORKDIR /app

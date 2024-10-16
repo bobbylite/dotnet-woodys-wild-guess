@@ -5,7 +5,7 @@ public class OidcConstants
     public static class Authorization {
         public static string GrantTypeKey = "grant_type";
         public static string GrantType = "authorization_code";
-        public static string CodeVerifierKey = "challenge";
+        public static string CodeVerifierKey = "code_verifier";
         public static string CodeVerifier = "challenge";
         public static string RedirectUriKey = "redirect_uri";
         public static string CodeKey = "code";

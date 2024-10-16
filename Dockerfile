@@ -11,7 +11,7 @@ COPY . .
 RUN dotnet restore "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj"
 
 # Build and publish the application
-RUN dotnet publish "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj" -c Release -o /app/publish
+RUN dotnet publish "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj" -c Release -o ./app/publish
 
 # Use the official ASP.NET Core runtime image for running the application
 FROM mcr.microsoft.com/dotnet/aspnet:8.0.0 AS runtime
@@ -26,4 +26,4 @@ COPY --from=build /app/publish .
 EXPOSE 80
 
 # Set the entry point for the container
-ENTRYPOINT ["dotnet", "/app/publish/dotnet-woodys-wild-guess.dll"]
+ENTRYPOINT ["dotnet", "./app/publish/dotnet-woodys-wild-guess.dll"]

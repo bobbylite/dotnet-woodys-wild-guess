@@ -14,7 +14,7 @@ RUN dotnet restore "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj"
 RUN dotnet publish "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj" -c Release -o /app/publish
 
 # Use the official ASP.NET Core runtime image for running the application
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.403 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.0 AS runtime
 
 # Set the working directory for the runtime
 WORKDIR /app

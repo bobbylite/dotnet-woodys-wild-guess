@@ -87,24 +87,25 @@ public class TwitterService : ITwitterService
         ArgumentNullException.ThrowIfNull(code);
 
         _logger.LogDebug("Creating Twitter/X HTTP Client");
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = _httpClientFactory.CreateClient(HttpClientNames.TwitterAuthroizationClient);
         _logger.LogDebug("Adding Basic Authorization Headers for Twitter HTTP Client");
         httpClient.AddTwitterAuthorizationHeaders(_twitterOptions.ClientId, _twitterOptions.ClientSecret);
 
         var formData = new Dictionary<string, string>
         {
-            { "code", code },
-            { "redirect_uri", _twitterOptions.RedirectUri },
-            { "grant_type", TwitterAuthorizationConstants.GrantType },
-            { "code_verifier", TwitterAuthorizationConstants.CodeVerifier }
+            { OidcConstants.Authorization.CodeKey, code },
+            { OidcConstants.Authorization.RedirectUriKey, _twitterOptions.RedirectUri },
+            { OidcConstants.Authorization.GrantTypeKey, OidcConstants.Authorization.GrantType },
+            { OidcConstants.Authorization.CodeVerifierKey, OidcConstants.Authorization.CodeVerifier }
         };
 
         var content = new FormUrlEncodedContent(formData);
         content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.FormUrlEncoded);
         
         var tokenUrl = _twitterOptions.ApiBaseUrl
-            .AppendPathSegment("2")
-            .AppendPathSegments("oauth2", "token");
+            .AppendPathSegment(OidcConstants.Twitter.Api.Version)
+            .AppendPathSegment(OidcConstants.Twitter.Api.Authorization.Protocol)
+            .AppendPathSegment(OidcConstants.Twitter.Api.Token);
 
         _logger.LogDebug("Performing POST request to Twitter API for Access Token");
         var response = await httpClient.PostAsync(tokenUrl, content);
@@ -148,7 +149,7 @@ public class TwitterService : ITwitterService
         ArgumentNullException.ThrowIfNull(tweetMessage);
 
         _logger.LogDebug("Creating Twitter/X HTTP Client");
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = _httpClientFactory.CreateClient(HttpClientNames.TwitterApiClient);
         _logger.LogDebug("Adding Bearer Token Authorization Headers for Twitter HTTP Client");
         httpClient.AddTwitterBearerTokenAuthorizationHeaders(AccessToken);
 
@@ -162,8 +163,8 @@ public class TwitterService : ITwitterService
         var content = new StringContent(serializedTweetData, Encoding.UTF8, MediaTypeNames.Application.Json);
 
         var tweetUrl = _twitterOptions.ApiBaseUrl
-            .AppendPathSegment("2")
-            .AppendPathSegment("tweets");
+            .AppendPathSegment(OidcConstants.Twitter.Api.Version)
+            .AppendPathSegment(OidcConstants.Twitter.Api.Tweets);
 
         _logger.LogDebug("Performing POST request to Twitter API for Access Token");
         var response = await httpClient.PostAsync(tweetUrl, content);

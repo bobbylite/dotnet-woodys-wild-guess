@@ -1,5 +1,5 @@
 # Use the official .NET SDK image for building the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.0 AS build
 
 # Set the working directory inside the container
 WORKDIR /src

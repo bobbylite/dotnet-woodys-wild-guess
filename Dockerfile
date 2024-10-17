@@ -7,6 +7,10 @@ WORKDIR /src
 # Copy everything, including project files, to the container
 COPY . .
 
+# Trust the HTTPS development certificate
+RUN dotnet dev-certs https --clean
+RUN dotnet dev-certs https --trust
+
 # Restore dependencies for the main project and referenced projects
 RUN dotnet restore "./dotnet-woodys-wild-guess/dotnet-woodys-wild-guess.csproj"
 
@@ -22,8 +26,12 @@ WORKDIR /app
 # Copy the published output from the build stage to the runtime stage
 COPY --from=build /app/publish .
 
-# Expose port 80 for the web application
+# Expose port 443 for the web application
 EXPOSE 80
+EXPOSE 443
+
+# Set environment variable to run the app in Development mode
+ENV ASPNETCORE_ENVIRONMENT=Development
 
 # Set the entry point for the container
 ENTRYPOINT ["dotnet", "dotnet-woodys-wild-guess.dll"]

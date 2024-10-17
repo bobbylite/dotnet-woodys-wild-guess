@@ -101,7 +101,7 @@ example:
 ### Running Woody's Wild Guess Web Application
 After configurations are completed, you can run the web application locally.
 Run the project with the following command:
-```sh
+```console
 dotnet run --project woodyswildguess --launch-profile https
 ```
 
@@ -109,7 +109,7 @@ dotnet run --project woodyswildguess --launch-profile https
 #### Step 1: :hammer_and_wrench: Build the Docker Image
 Easily package your Blazor app into a container image using this command:
 
-```bash
+```console
 sudo dotnet publish --os linux --arch x64 -t:PublishContainer
 ```
 This command will:

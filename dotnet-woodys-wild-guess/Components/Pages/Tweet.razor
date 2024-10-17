@@ -19,14 +19,22 @@
 
 @attribute [Authorize]
 
-<div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Share Your Tweet</h5>
-            <div class="mb-3">
-                <textarea id="tweet-text" class="form-control" placeholder="What's happening?" rows="3"></textarea>
-            </div>
-            <button id="send-tweet-btn" class="btn btn-primary">Tweet</button>
+<article class="content">
+    <h5 class="card-title mb-3">Share Your Tweet</h5>
+    <textarea id="tweet-text" class="form-control mb-5" placeholder="What's happening?" rows="3"></textarea>
+    <button id="send-tweet-btn" class="btn btn-primary">Tweet</button>
+</article>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="successToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <img height="20" width="20" src="https://raw.githubusercontent.com/bobbylite/dotnet-woodys-wild-guess/refs/heads/main/dotnet-woodys-wild-guess/wwwroot/img/woodys-wild-guess-logo.JPG" class="rounded me-2" alt="...">
+            <strong class="me-auto">Woody's Wild Guess</strong>
+            <small>Now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Tweet Sent - On time and under budget!
         </div>
     </div>
 </div>
@@ -81,9 +89,15 @@
         ArgumentNullException.ThrowIfNullOrEmpty(tweetMessage);
         
         var statusCode = await TwitterService.SendTweetAsync(tweetMessage);
+        _logger.LogInformation($"Tweet status code: {statusCode}");
         if (statusCode == System.Net.HttpStatusCode.Created)
         {
             return "success";
+        }
+
+        if (statusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            return "unauthorized";
         }
 
         return "failure";

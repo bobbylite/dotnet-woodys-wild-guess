@@ -21,18 +21,15 @@
 
 @attribute [Authorize]
 
-<div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
-    <div class="card-body text-center">
-        <i class="bi bi-twitter text-primary display-4 mb-3"></i>
-        <h5 class="card-title">Authorize Twitter Application</h5>
-        <p class="card-text mb-4">By authorizing this application, you will allow it to access your Twitter account and perform actions on your behalf. Make sure you trust the app before proceeding.</p>
-        <form id="oauthForm" action="@_authorizeUrl" method="post">
-            <button type="submit" id="authorizeBtn" class="btn btn-primary w-100 btn-lg">
-                <i class="bi bi-box-arrow-in-right"></i> Authorize
-            </button>
-        </form>
-    </div>
-</div>
+<article class="content">
+    <h5 class="card-title">Authorize Twitter Application</h5>
+    <p class="card-text mb-4">By authorizing this application, you will allow it to access your Twitter account and perform actions on your behalf. Make sure you trust the app before proceeding.</p>
+    <form id="oauthForm" action="@_authorizeUrl" method="post">
+        <button type="submit" id="authorizeBtn" class="btn btn-primary w-100 btn-lg">
+            <i class="bi bi-box-arrow-in-right"></i> Authorize
+        </button>
+    </form>
+</article>
 
 @code {
     private string? _authorizeUrl;

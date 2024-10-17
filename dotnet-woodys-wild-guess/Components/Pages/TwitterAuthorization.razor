@@ -9,6 +9,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.Extensions.Options
 @using System.Text.Json
+@using dotnet.woodyswildguess.Constants
 @using dotnet.woodyswildguess.Services.Twitter
 
 @inject IOptionsSnapshot<TwitterOptions> TwitterOptions
@@ -100,13 +101,13 @@
         var twitterBaseUrl = new Url(twitterOptions.BaseUrl);
 
         return twitterBaseUrl
-            .SetQueryParam("response_type", twitterOptions.ResponseType)
-            .SetQueryParam("client_id", twitterOptions.ClientId)
-            .SetQueryParam("redirect_uri", twitterOptions.RedirectUri)
-            .SetQueryParam("scope", string.Join(" ", twitterOptions.Scope))
-            .SetQueryParam("state", stateHash)
-            .SetQueryParam("code_challenge", twitterOptions.CodeChallenge)
-            .SetQueryParam("code_challenge_method", twitterOptions.CodeChallengeMethod)
+            .SetQueryParam(OidcConstants.Authorization.ResponseTypeKey, twitterOptions.ResponseType)
+            .SetQueryParam(OidcConstants.Authorization.ClientIdKey, twitterOptions.ClientId)
+            .SetQueryParam(OidcConstants.Authorization.RedirectUriKey, twitterOptions.RedirectUri)
+            .SetQueryParam(OidcConstants.Authorization.ScopeKey, string.Join("\x20", twitterOptions.Scope))
+            .SetQueryParam(OidcConstants.Authorization.StateKey, stateHash)
+            .SetQueryParam(OidcConstants.Authorization.CodeChallengeKey, twitterOptions.CodeChallenge)
+            .SetQueryParam(OidcConstants.Authorization.CodeChallengeMethodKey, twitterOptions.CodeChallengeMethod)
             .ToString();
     }
 }

@@ -9,6 +9,12 @@ public class OidcConstants
         public static string CodeVerifier = "challenge";
         public static string RedirectUriKey = "redirect_uri";
         public static string CodeKey = "code";
+        public static string ScopeKey = "scope";
+        public static string StateKey = "state";
+        public static string CodeChallengeKey = "code_challenge";
+        public static string CodeChallengeMethodKey = "code_challenge_method";
+        public static string ResponseTypeKey = "response_type";
+        public static string ClientIdKey = "client_id";
     }
 
     public static class Twitter {

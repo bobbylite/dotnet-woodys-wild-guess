@@ -105,6 +105,35 @@ Run the project with the following command:
 dotnet run --project woodyswildguess --launch-profile https
 ```
 
+### :rocket: Building and Running Your Blazor App with Docker
+#### Step 1: :hammer_and_wrench: Build the Docker Image
+Easily package your Blazor app into a container image using this command:
+
+```bash
+sudo dotnet publish --os linux --arch x64 -t:PublishContainer
+```
+This command will:
+
+- Target a Linux OS (--os linux) and 64-bit architecture (--arch x64).
+- Use the PublishContainer target to create a container image directly from your .csproj configuration.
+
+#### Step 2: :running_man: Run the Container
+Run your containerized app and map it to your local port with:
+
+```console
+docker run -p 8080:8080 dotnet-woodys-wild-world-image
+```
+This command will:
+
+- Spin up a new Docker container from your image named dotnet-woodys-wild-world-image.
+- Map port 8080 inside the container to port 8080 on your host machine, making your Blazor app available at http://localhost:8080.
+
+
+### :star: Why Containerize?
+Containerizing your Blazor app ensures a consistent and isolated environment for deployment, making it easier to run your app anywhere with Docker, from your local machine to the cloud. Plus, it's perfect for ensuring a smooth, production-ready experience! 🐳✨
+
+This version highlights the process in a more engaging way, includes emojis for a modern touch, and provides a brief explanation of the commands and benefits of containerization.
+
 ## :gear: Built With
 
 - [.NET 8](https://dotnet.microsoft.com/en-us/)

@@ -39,7 +39,7 @@ export const addTweetSupport = async (dotnetHelper) => {
 function showAlert(message, type = 'primary', duration = 5000, containerSelector = '.body-container') {
     // Create the alert element
     const alertElement = document.createElement('div');
-    alertElement.className = `alert alert-${type} alert-dismissible fade show mt-1`;
+    alertElement.className = `alert alert-${type} alert-dismissible fade show mt-3`;
     alertElement.role = 'alert';
     alertElement.innerHTML = `
         ${message}

@@ -1,7 +1,5 @@
-using dotnet.woodyswildguess.Client.Pages;
 using dotnet.woodyswildguess.Components;
 using dotnet.woodyswildguess.Extensions;
-using dotnet.woodyswildguess.Services.Twitter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +42,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+// Map the chat hub
+app.MapChatHub();
 
 app.MapControllers();
 

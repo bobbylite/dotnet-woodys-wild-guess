@@ -32,4 +32,17 @@ public static class HttpClientExtensions
 
         return httpClient;
     }
+
+    /// <summary>
+    /// Adds the bearer token to the request headers
+    /// </summary>
+    /// <param name="httpClient"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public static HttpClient AddHuggingFaceTokenAuthorizationHeaders(this HttpClient httpClient, string token)
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return httpClient;
+    }
 }

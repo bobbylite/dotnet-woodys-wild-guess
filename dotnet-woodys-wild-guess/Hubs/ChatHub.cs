@@ -1,3 +1,6 @@
+using System.Text.Json;
+using dotnet.woodyswildguess.Extensions;
+using dotnet.woodyswildguess.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace dotnet.woodyswildguess.Hubs;
@@ -7,10 +10,8 @@ namespace dotnet.woodyswildguess.Hubs;
 /// </summary>
 public class ChatHub : Hub
 {
-    // <summary>
-    // The context for the hub, providing access to methods that can be used from a SignalR hub.
-    // </summary>
     private readonly IHubContext<ChatHub> _hubContext;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ChatHub"/> class.
@@ -19,9 +20,14 @@ public class ChatHub : Hub
     /// <remarks>
     /// This constructor initializes a new instance of the <see cref="ChatHub"/> class.
     /// </remarks>
-    public ChatHub(IHubContext<ChatHub> hubContext)
+    public ChatHub(
+        IHubContext<ChatHub> hubContext,
+        IHttpClientFactory httpClientFactory)
     {
+        ArgumentNullException.ThrowIfNull(hubContext);
+        ArgumentNullException.ThrowIfNull(httpClientFactory);
         _hubContext = hubContext;
+        _httpClientFactory = httpClientFactory;
     }
 
     /// <summary>
@@ -33,6 +39,47 @@ public class ChatHub : Hub
     public async Task SendMessage(string user, string message)
     {
         var username = Context?.User?.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+
+        // TODO: Send the message to all clients after inspecting with huggingface 
+        var httpClient = _httpClientFactory.CreateClient("HuggingFace");
+
+        var apiKey = "";
+        var modelUrl = "https://api-inference.huggingface.co/models/unitary/toxic-bert";
+        httpClient.AddHuggingFaceTokenAuthorizationHeaders(apiKey);
+
+        var content = new { inputs = message };
+        var serializedContent = JsonSerializer.Serialize(content);
+        var response = await httpClient.PostAsJsonAsync(modelUrl, serializedContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            
+            // Deserialize into List<List<LabelScore>> directly
+            var huggingFaceResponse = JsonSerializer.Deserialize<List<List<LabelScore>>>(jsonResponse);
+
+            // Check if message is toxic
+            if (huggingFaceResponse != null && huggingFaceResponse.Count > 0)
+            {
+                foreach (var labelScoreList in huggingFaceResponse)
+                {
+                    foreach (var labelScore in labelScoreList)
+                    {
+                        if (labelScore.Label == "toxic" && labelScore.Score > 0.7f)
+                        {
+                            Console.WriteLine("Message flagged as toxic");
+                            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Hugging Face Moderator", "This message has been flagged as toxic and has been removed.");
+                            return;
+                        }
+                    }
+                }
+
+                // If no toxic message was found
+                Console.WriteLine("Message is appropriate");
+            }
+        }
+
+        // Send the message to all clients
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", username, message);
     }
 

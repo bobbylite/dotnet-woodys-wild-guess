@@ -1,58 +1,53 @@
-﻿@page "/Chat"
-@rendermode InteractiveWebAssembly
+﻿@rendermode InteractiveWebAssembly
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.SignalR.Client
 @implements IAsyncDisposable
 
-@attribute [Authorize]
-
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 
-<title>Chat</title>
+@if (IsConnected)
+{
+    <!-- Floating Chat Room Container -->
+    <div class="position-fixed bottom-0 end-0 m-3 shadow-lg" style="width: 400px; max-height: 70vh; z-index: 1000;">
+        <!-- Chat Room Header -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Chat Room</h5>
+                <button class="btn-close" type="button" aria-label="Close"></button>
+            </div>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <h3 class="text-center mt-5">Chat Room</h3>
-            <div class="vh-50 overflow-auto mb-4" style="max-height: calc(100vh - 200px);">
-                <ul class="list-group">
+            <!-- Chat Messages Section -->
+            <div class="card-body overflow-auto" style="height: 300px;">
+                <ul class="list-group list-group-flush">
                     @foreach (var msg in messages)
                     {
                         <li class="list-group-item">@msg</li>
                     }
                 </ul>
             </div>
-        </div>
-    </div>
-</div>
 
-@if(IsConnected)
-{ 
-    <div class="fixed-bottom p-3 onlybalds-background-color">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-12 col-md-8 col-lg-6">
-                    <div class="input-group">
-                        <input type="text" class="form-control" @bind="message" placeholder="Message" />
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" @onclick="Send">Send</button>
-                        </div>
-                    </div>
+            <!-- Chat Input Section -->
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" class="form-control" @bind="message" placeholder="Type a message..." />
+                    <button class="btn btn-primary" @onclick="Send">Send</button>
                 </div>
             </div>
         </div>
     </div>
 }
 else
-{ 
+{
+    <!-- Loading Spinner -->
     <div class="d-flex justify-content-center align-items-center vh-100">
         <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
         </div>
     </div>
 }
+
 
 @code {
     [CascadingParameter]
@@ -94,7 +89,7 @@ else
     public async Task Connect()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri($"/chathub"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("chathub"))
             .Build();
 
         hubConnection.On<string, string>("ReceiveMessage", (username, message) =>

@@ -485,3 +485,7 @@ $RECYCLE.BIN/
 
 # Notes
 notes.txt
+
+# Vs code
+.vscode
+.vscode/*

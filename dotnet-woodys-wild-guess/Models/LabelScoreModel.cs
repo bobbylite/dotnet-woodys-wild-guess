@@ -5,7 +5,7 @@ namespace dotnet.woodyswildguess.Models;
 /// <summary>
 /// Represents the result of a Hugging Face toxicity classification, including the label and its corresponding confidence score.
 /// </summary>
-public class LabelScore
+public class LabelScoreModel
 {
     /// <summary>
     /// Gets or sets the classification label returned by the Hugging Face model.

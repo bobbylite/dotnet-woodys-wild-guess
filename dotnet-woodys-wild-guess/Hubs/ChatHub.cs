@@ -71,19 +71,51 @@ public class ChatHub : Hub
         var sentimentResponse = await httpClient.PostAsJsonAsync(sentimentAnalysisModelUrl, serializedContent);
         var sentimentJsonResponse = await sentimentResponse.Content.ReadAsStringAsync();
 
+        if (sentimentResponse.IsSuccessStatusCode)
+        {
+            var sentiment = JsonSerializer.Deserialize<List<List<LabelScoreModel>>>(sentimentJsonResponse);
+            var analysisOfSentiment = sentiment?.First<List<LabelScoreModel>>() ?? new();
+
+            foreach (var score in analysisOfSentiment)
+            {
+                if (score.Label is "negative" && score.Score > 0.8f)
+                {
+                    var toxicityLevel = score.Score * 100;
+                    _logger.LogDebug("Message from {User} flagged as positive", user);
+                    await _hubContext.Clients.All.SendAsync(
+                        "ReceiveMessage",
+                        "Sentiment Moderator",
+                        $"This message has been flagged as a negative thing about woody with a toxicity score of {toxicityLevel}%"
+                    );
+                    return;
+                }
+                if (score.Label is "positive" && score.Score > 0.8f)
+                {
+                    var toxicityLevel = score.Score * 100;
+                    _logger.LogDebug("Message from {User} flagged as negative", user);
+                    await _hubContext.Clients.All.SendAsync(
+                        "ReceiveMessage",
+                        "Sentiment Moderator",
+                        $"Woody approves this message because of it's high with a positivity score of {toxicityLevel}%"
+                    );
+                    return;
+                }
+            }
+        }
+        
         var toxicityModelUrl = _huggingFaceOptions.BaseUrl
             .AppendPathSegments("models", "unitary", "toxic-bert");
-        var response = await httpClient.PostAsJsonAsync(modelUrl, serializedContent);
+        var toxicityResponse = await httpClient.PostAsJsonAsync(toxicityModelUrl, serializedContent);
 
-        if (response.IsSuccessStatusCode)
+        if (toxicityResponse.IsSuccessStatusCode)
         {
-            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var toxicityLevelsJson = await toxicityResponse.Content.ReadAsStringAsync();
             
-            var huggingFaceResponse = JsonSerializer.Deserialize<List<List<LabelScore>>>(jsonResponse);
+            var toxicityLevels = JsonSerializer.Deserialize<List<List<LabelScoreModel>>>(toxicityLevelsJson);
 
-            if (huggingFaceResponse != null && huggingFaceResponse.Count > 0)
+            if (toxicityLevels is not null && toxicityLevels.Count > 0)
             {
-                foreach (var labelScoreList in huggingFaceResponse)
+                foreach (var labelScoreList in toxicityLevels)
                 {
                     foreach (var labelScore in labelScoreList)
                     {

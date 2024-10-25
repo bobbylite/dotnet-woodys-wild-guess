@@ -1,11 +1,5 @@
-using System.Text.Json;
-using dotnet.woodyswildguess.Configuration;
-using dotnet.woodyswildguess.Constants;
-using dotnet.woodyswildguess.Extensions;
-using dotnet.woodyswildguess.Models;
-using Flurl;
+using dotnet.woodyswildguess.Services.HuggingFace;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
 
 namespace dotnet.woodyswildguess.Hubs;
 
@@ -15,34 +9,34 @@ namespace dotnet.woodyswildguess.Hubs;
 public class ChatHub : Hub
 {
     private readonly IHubContext<ChatHub> _hubContext;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly HuggingFaceOptions _huggingFaceOptions;
+    private readonly IHuggingFaceToxicityService _huggingFaceToxicityService;
+    private readonly IHuggingFaceSentimentService _huggingFaceSentimentService;
     private readonly ILogger<ChatHub> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ChatHub"/> class.
     /// </summary>
     /// <param name="hubContext">The context for the hub.</param>
-    /// <param name="httpClientFactory">The factory for creating <see cref="HttpClient"/> instances.</param>
-    /// <param name="huggingFaceOptions">The options for the Hugging Face API.</param>
+    /// <param name="huggingFaceToxicityService">The service for interacting with the Hugging Face API for toxicity analysis.</param>
+    /// <param name="huggingFaceSentimentService">The service for interacting with the Hugging Face API for sentiment analysis.</param>
     /// <param name="logger">The logger.</param>
     /// <remarks>
     /// This constructor initializes a new instance of the <see cref="ChatHub"/> class.
     /// </remarks>
     public ChatHub(
         IHubContext<ChatHub> hubContext,
-        IHttpClientFactory httpClientFactory,
-        IOptionsSnapshot<HuggingFaceOptions> huggingFaceOptions,
+        IHuggingFaceToxicityService huggingFaceToxicityService,
+        IHuggingFaceSentimentService huggingFaceSentimentService,
         ILogger<ChatHub> logger)
     {
         ArgumentNullException.ThrowIfNull(hubContext);
-        ArgumentNullException.ThrowIfNull(httpClientFactory);
-        ArgumentNullException.ThrowIfNull(huggingFaceOptions);
+        ArgumentNullException.ThrowIfNull(huggingFaceToxicityService);
+        ArgumentNullException.ThrowIfNull(huggingFaceSentimentService);
         ArgumentNullException.ThrowIfNull(logger);
 
         _hubContext = hubContext;
-        _httpClientFactory = httpClientFactory;
-        _huggingFaceOptions = huggingFaceOptions.Value;
+        _huggingFaceToxicityService = huggingFaceToxicityService;
+        _huggingFaceSentimentService = huggingFaceSentimentService;
         _logger = logger;
     }
 
@@ -59,82 +53,47 @@ public class ChatHub : Hub
     {
         _logger.LogDebug("Received message from {User}", user);
 
-        var huggingFaceClient = _httpClientFactory.CreateClient(HttpClientNames.HuggingFaceApiClient);
-        huggingFaceClient.AddHuggingFaceTokenAuthorizationHeaders(_huggingFaceOptions.ApiKey);
+        var toxicityScores = await _huggingFaceToxicityService.PerformToxicBertAnalysisAsync(message);
+        var isToxic = _huggingFaceToxicityService.IsToxic(toxicityScores);
 
-        var content = new { inputs = message };
-        var serializedContent = JsonSerializer.Serialize(content);
-
-        var toxicityModelUrl = _huggingFaceOptions.BaseUrl
-            .AppendPathSegments("models", "unitary", "toxic-bert");
-        var toxicityResponse = await huggingFaceClient.PostAsJsonAsync(toxicityModelUrl, serializedContent);
-
-        if (toxicityResponse.IsSuccessStatusCode)
+        if (isToxic)
         {
-            var toxicityLevelsJson = await toxicityResponse.Content.ReadAsStringAsync();
-            
-            var toxicityLevels = JsonSerializer.Deserialize<List<List<LabelScoreModel>>>(toxicityLevelsJson);
+            _logger.LogDebug("Message from {User} flagged as toxic", user);
+            await _hubContext.Clients.All.SendAsync(
+                "ReceiveMessage",
+                "Toxicity Moderator",
+                "This message has been flagged as toxic and has been removed."
+            );
 
-            if (toxicityLevels is not null && toxicityLevels.Count > 0)
-            {
-                foreach (var labelScoreList in toxicityLevels)
-                {
-                    foreach (var labelScore in labelScoreList)
-                    {
-                        if (labelScore.Label == "toxic" && labelScore.Score > 0.7f)
-                        {
-                            _logger.LogDebug("Message from {User} flagged as toxic", user);
-                            await _hubContext.Clients.All.SendAsync(
-                                "ReceiveMessage",
-                                "Toxicity Moderator",
-                                "This message has been flagged as toxic and has been removed."
-                            );
-                            return;
-                        }
-                    }
-                }
-            }
+            return;
         }
 
-        var sentimentAnalysisModelUrl = _huggingFaceOptions.BaseUrl
-            .AppendPathSegments("models", "cardiffnlp", "twitter-roberta-base-sentiment-latest");
+        var sentimentScores = await _huggingFaceSentimentService.PerformTwitterRobertaSentimentAnalysisAsync(message);
+        var isPositive = _huggingFaceSentimentService.IsPositive(sentimentScores);
+        var isNegative = _huggingFaceSentimentService.IsNegative(sentimentScores);
 
-        var huggingFaceSentimentClient = _httpClientFactory.CreateClient(HttpClientNames.HuggingFaceApiClient);
-        huggingFaceSentimentClient.AddHuggingFaceTokenAuthorizationHeaders(_huggingFaceOptions.ApiKey);
-
-        var sentimentResponse = await huggingFaceSentimentClient.PostAsJsonAsync(sentimentAnalysisModelUrl, serializedContent);
-        var sentimentJsonResponse = await sentimentResponse.Content.ReadAsStringAsync();
-
-        if (sentimentResponse.IsSuccessStatusCode)
+        if (isPositive && !isNegative)
         {
-            var sentiment = JsonSerializer.Deserialize<List<List<LabelScoreModel>>>(sentimentJsonResponse);
-            var analysisOfSentiment = sentiment?.First<List<LabelScoreModel>>() ?? new();
+            _logger.LogDebug("Message from {User} flagged as positive", user);
+            await _hubContext.Clients.All.SendAsync(
+                "ReceiveMessage",
+                "Sentiment Moderator",
+                "This message has been flagged as positive."
+            );
 
-            foreach (var score in analysisOfSentiment)
-            {
-                if (score.Label is "negative" && score.Score > 0.8f)
-                {
-                    var toxicityLevel = score.Score * 100;
-                    _logger.LogDebug("Message from {User} flagged as positive", user);
-                    await _hubContext.Clients.All.SendAsync(
-                        "ReceiveMessage",
-                        "Sentiment Moderator",
-                        $"This message has been flagged as a negative thing about woody with a toxicity score of {toxicityLevel}%"
-                    );
-                    return;
-                }
-                if (score.Label is "positive" && score.Score > 0.8f)
-                {
-                    var toxicityLevel = score.Score * 100;
-                    _logger.LogDebug("Message from {User} flagged as negative", user);
-                    await _hubContext.Clients.All.SendAsync(
-                        "ReceiveMessage",
-                        "Sentiment Moderator",
-                        $"Woody approves this message because of it's high positivity score of {toxicityLevel}%"
-                    );
-                    return;
-                }
-            }
+            return;
+        }
+
+        if (isNegative && !isPositive)
+        {
+            _logger.LogDebug("Message from {User} flagged as negative", user);
+            await _hubContext.Clients.All.SendAsync(
+                "ReceiveMessage",
+                "Sentiment Moderator",
+                "This message has been flagged as negative."
+            );
+
+            return;
         }
 
         _logger.LogDebug("Message is appropriate");

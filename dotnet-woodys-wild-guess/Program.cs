@@ -12,6 +12,9 @@ builder.Services.AddHttpClient();
 // Add Twitter Service
 builder.AddTwitterServices();
 
+// Add Hugging Face AI and ML Services
+builder.Services.AddHuggingFaceServices();
+
 // Add Access Control
 builder.AddAccessControl();
 

@@ -54,6 +54,7 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.Configure<TwitterOptions>(configuration.GetSection(TwitterOptions.SectionKey));
+        services.Configure<HuggingFaceOptions>(configuration.GetSection(HuggingFaceOptions.SectionKey));
 
         return services;
     }

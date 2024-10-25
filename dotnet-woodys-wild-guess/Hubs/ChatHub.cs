@@ -59,16 +59,50 @@ public class ChatHub : Hub
     {
         _logger.LogDebug("Received message from {User}", user);
 
-        var httpClient = _httpClientFactory.CreateClient(HttpClientNames.HuggingFaceApiClient);
-        httpClient.AddHuggingFaceTokenAuthorizationHeaders(_huggingFaceOptions.ApiKey);
+        var huggingFaceClient = _httpClientFactory.CreateClient(HttpClientNames.HuggingFaceApiClient);
+        huggingFaceClient.AddHuggingFaceTokenAuthorizationHeaders(_huggingFaceOptions.ApiKey);
 
         var content = new { inputs = message };
         var serializedContent = JsonSerializer.Serialize(content);
 
+        var toxicityModelUrl = _huggingFaceOptions.BaseUrl
+            .AppendPathSegments("models", "unitary", "toxic-bert");
+        var toxicityResponse = await huggingFaceClient.PostAsJsonAsync(toxicityModelUrl, serializedContent);
+
+        if (toxicityResponse.IsSuccessStatusCode)
+        {
+            var toxicityLevelsJson = await toxicityResponse.Content.ReadAsStringAsync();
+            
+            var toxicityLevels = JsonSerializer.Deserialize<List<List<LabelScoreModel>>>(toxicityLevelsJson);
+
+            if (toxicityLevels is not null && toxicityLevels.Count > 0)
+            {
+                foreach (var labelScoreList in toxicityLevels)
+                {
+                    foreach (var labelScore in labelScoreList)
+                    {
+                        if (labelScore.Label == "toxic" && labelScore.Score > 0.7f)
+                        {
+                            _logger.LogDebug("Message from {User} flagged as toxic", user);
+                            await _hubContext.Clients.All.SendAsync(
+                                "ReceiveMessage",
+                                "Toxicity Moderator",
+                                "This message has been flagged as toxic and has been removed."
+                            );
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         var sentimentAnalysisModelUrl = _huggingFaceOptions.BaseUrl
             .AppendPathSegments("models", "cardiffnlp", "twitter-roberta-base-sentiment-latest");
 
-        var sentimentResponse = await httpClient.PostAsJsonAsync(sentimentAnalysisModelUrl, serializedContent);
+        var huggingFaceSentimentClient = _httpClientFactory.CreateClient(HttpClientNames.HuggingFaceApiClient);
+        huggingFaceSentimentClient.AddHuggingFaceTokenAuthorizationHeaders(_huggingFaceOptions.ApiKey);
+
+        var sentimentResponse = await huggingFaceSentimentClient.PostAsJsonAsync(sentimentAnalysisModelUrl, serializedContent);
         var sentimentJsonResponse = await sentimentResponse.Content.ReadAsStringAsync();
 
         if (sentimentResponse.IsSuccessStatusCode)
@@ -96,40 +130,9 @@ public class ChatHub : Hub
                     await _hubContext.Clients.All.SendAsync(
                         "ReceiveMessage",
                         "Sentiment Moderator",
-                        $"Woody approves this message because of it's high with a positivity score of {toxicityLevel}%"
+                        $"Woody approves this message because of it's high positivity score of {toxicityLevel}%"
                     );
                     return;
-                }
-            }
-        }
-        
-        var toxicityModelUrl = _huggingFaceOptions.BaseUrl
-            .AppendPathSegments("models", "unitary", "toxic-bert");
-        var toxicityResponse = await httpClient.PostAsJsonAsync(toxicityModelUrl, serializedContent);
-
-        if (toxicityResponse.IsSuccessStatusCode)
-        {
-            var toxicityLevelsJson = await toxicityResponse.Content.ReadAsStringAsync();
-            
-            var toxicityLevels = JsonSerializer.Deserialize<List<List<LabelScoreModel>>>(toxicityLevelsJson);
-
-            if (toxicityLevels is not null && toxicityLevels.Count > 0)
-            {
-                foreach (var labelScoreList in toxicityLevels)
-                {
-                    foreach (var labelScore in labelScoreList)
-                    {
-                        if (labelScore.Label == "toxic" && labelScore.Score > 0.7f)
-                        {
-                            _logger.LogDebug("Message from {User} flagged as toxic", user);
-                            await _hubContext.Clients.All.SendAsync(
-                                "ReceiveMessage",
-                                "Hugging Face Moderator",
-                                "This message has been flagged as toxic and has been removed."
-                            );
-                            return;
-                        }
-                    }
                 }
             }
         }

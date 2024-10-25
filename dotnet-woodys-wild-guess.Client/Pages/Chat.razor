@@ -61,12 +61,6 @@ else
 
     public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
 
-    protected override void OnInitialized()
-    {
-        objRef = DotNetObjectReference.Create(this);
-        base.OnInitialized();
-    }
-
     protected override async Task OnInitializedAsync()
     {
         if (authenticationState is not null)
@@ -74,13 +68,24 @@ else
             var state = await authenticationState;
             user = state?.User?.Claims?.FirstOrDefault(c => c.Type == "name")?.Value ?? string.Empty;
         }
+
+        objRef = DotNetObjectReference.Create(this);
+
         await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        {   
+        {
+            var _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/WoodysWildGuessAssemblyScripts.js");
+            
+            if (_jsModule is not null)
+            {
+                await _jsModule.InvokeVoidAsync("collapseNavbar");
+                await _jsModule.InvokeVoidAsync("OnEnterKeyPressed", objRef);
+            }
+
             await Connect();
         }
     }

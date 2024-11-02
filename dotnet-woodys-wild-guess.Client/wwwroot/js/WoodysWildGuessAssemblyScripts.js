@@ -5,7 +5,7 @@ export function collapseNavbar() {
     $(document).ready(function() {
         $('.navbar-collapse').collapse('hide');
     });
-  };
+};
 
 /**
  * Builds OnEnterKeyPressed event for the chatroom.
